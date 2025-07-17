@@ -1,7 +1,7 @@
 # FinancialAdviser
 Capstone project financial adviser
 
-# Steps to Run application without docker:
+## Steps to Run application without docker:
 cd finadviser
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -29,7 +29,7 @@ http://localhost:8501
 
 
 
-##### Steps to Run application with Docker:
+## Steps to Run application with Docker:
 #Build and Run with Docker Compose
 #From the finadviser/ directory, run:
 docker-compose up --build
@@ -45,14 +45,14 @@ Streamlit	http://localhost:8501
 docker-compose down
 
 
-##### Running application by pulling images from dockerHub:
+## Running application by pulling images from dockerHub:
 #Pull the images from dockerHub and start application
 
 docker pull yourusername/finadviser-backend
 docker pull yourusername/finadviser-frontend
 docker-compose up
 
-##### Push the image to dockerHub:
+## Push the image to dockerHub:
 docker push yourusername/finadviser-backend:latest
 docker push yourusername/finadviser-frontend:latest
 
