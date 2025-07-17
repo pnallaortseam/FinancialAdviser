@@ -5,7 +5,7 @@ Capstone project financial adviser
 
 Steps to Run application without docker 
 
-###################################################
+###################################################\n
 cd finadviser
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
