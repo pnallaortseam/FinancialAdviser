@@ -1,0 +1,14 @@
+chainlit
+streamlit
+langchain
+pydantic
+requests
+prophet
+cmdstanpy
+pandas
+matplotlib
+transformers
+langchain_community
+torch
+langchain-google-genai
+yfinance
