@@ -2,7 +2,9 @@
 Capstone project financial adviser
 
 ################################################### 
+
 Steps to Run application without docker 
+
 ###################################################
 cd finadviser
 python -m venv venv
