@@ -12,3 +12,5 @@ langchain_community
 torch
 langchain-google-genai
 yfinance
+uvicorn
+gunicorn
