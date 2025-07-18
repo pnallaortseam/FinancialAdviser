@@ -1,10 +1,10 @@
 
 from langchain_google_genai import ChatGoogleGenerativeAI
-#from env import import_my_env
+from env import import_my_env
 from data_cache import forecast_data
 
-#import_my_env()
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
+import_my_env()
+#GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.1)
 
 def build_structured_prompt(user_input, stock_summaries: dict):
