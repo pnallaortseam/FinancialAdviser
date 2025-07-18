@@ -39,6 +39,17 @@ def run_streamlit_ui():
         submitted = st.form_submit_button("Submit")
 
     if submitted:
+        # Validation checks before API call
+        if monthly_expenses > monthly_income:
+            st.error("Monthly expenses cannot exceed monthly income.")
+            return
+        if monthly_income - monthly_expenses <= 0:
+            st.error("Disposable income must be positive.")
+            return
+        if monthly_investment > (monthly_income - monthly_expenses):
+            st.error("Monthly investment cannot exceed disposable income.")
+            return
+
         user_data = {
             "age": age,
             "monthly_income": monthly_income,
