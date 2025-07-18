@@ -59,7 +59,8 @@ def run_streamlit_ui():
 
         st.subheader("Generating the advice...")
         try:
-            res = requests.post("http://localhost:8000/recommend", json=user_data)
+            #res = requests.post("http://localhost:8000/recommend", json=user_data)
+            res = requests.post("http://backend:8000/recommend", json=user_data)
             if res.status_code == 200:
                 result = res.json()
                 advice = result["advice"]

@@ -1,8 +1,8 @@
 
 import pandas as pd
-from stock_analysis import get_sentiment_from_news
-from config import settings
-from data_cache import ohlc_data, news_data, fundamentals_data, forecast_data
+from app.stock_analysis import get_sentiment_from_news
+from app.config import settings
+from app.data_cache import ohlc_data, news_data, fundamentals_data, forecast_data
 
 # Load sector mapping from file
 nifty_path = settings.DATA_DIR / "nifty_500_lst.csv"

@@ -9,7 +9,9 @@ from typing import List
 from app.stock_analysis import summarize_stock_insights
 from app.rank_top_stocks import rank_top_stocks
 from app.llm_prompt import get_final_stock_advice
-
+from app.data_cache import load_all_data
+from app.data_fetcher_yfinance import fetch_and_save_all_stocks
+from app.config import settings
 app = FastAPI()
 
 class UserProfile(BaseModel):
@@ -28,6 +30,28 @@ class UserProfile(BaseModel):
     investment_type: str
     interested_sectors: List[str]
     investor_knowledge: str
+
+@app.on_event("startup")
+def on_startup():
+    print("App is starting... loading data cache")
+    # Check if today's data exists
+    any_missing = False
+    for symbol in settings.INDEX_STOCKS[:5]:  # Just check a few to avoid long loops
+        ohlc_path = settings.OHLC_DIR / f"{symbol}_OHLC_{settings.TODAY}.csv"
+        news_path = settings.NEWS_DIR / f"{symbol}_news_{settings.TODAY}.csv"
+        fund_path = settings.FUNDMENTALS_DIR / f"{symbol}_fundamentals_{settings.TODAY}.csv"
+        if not (ohlc_path.exists() and news_path.exists() and fund_path.exists()):
+            any_missing = True
+            break
+
+    if any_missing:
+        print("Data for today not found. Fetching fresh stock data...")
+        fetch_and_save_all_stocks()
+    else:
+        print("Today's data is already present. Skipping fetch.")
+
+    print("Loading data into cache...")
+    load_all_data()
 
 @app.post("/recommend")
 async def recommend(user: UserProfile):

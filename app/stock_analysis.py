@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime
 from transformers import pipeline
 #from app.config import settings
-from data_cache import fundamentals_data, ohlc_data, news_data
+from app.data_cache import fundamentals_data, ohlc_data, news_data
 
 sentiment_model = pipeline("sentiment-analysis",
                            model="distilbert-base-uncased-finetuned-sst-2-english")

@@ -1,7 +1,7 @@
 
 from langchain_google_genai import ChatGoogleGenerativeAI
-from env import import_my_env
-from data_cache import forecast_data
+from app.env import import_my_env
+from app.data_cache import forecast_data
 
 import_my_env()
 #GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")

@@ -6,12 +6,12 @@ from datetime import datetime
 from pathlib import Path
 import glob
 from config  import settings
-from env import import_my_env
+#from env import import_my_env
 import yfinance as yf
 
-import_my_env()
+#import_my_env()
 # Constants
-API_KEY = os.getenv("ALPHAVANTAGE_API_KEY", "demo")
+#API_KEY = os.getenv("ALPHAVANTAGE_API_KEY", "demo")
 # TODAY = datetime.today().strftime("%d-%m-%y")
 # DATA_DIR = Path("./stocks_data")
 # DATA_DIR.mkdir(exist_ok=True)

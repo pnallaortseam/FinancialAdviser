@@ -1,9 +1,9 @@
+import os
 import pandas as pd
 from pathlib import Path
-from config import settings
 from prophet import Prophet
 import logging
-import os
+from app.config import settings
 
 # Suppress Prophet warnings
 logging.getLogger("cmdstanpy").setLevel(logging.WARNING)
@@ -81,4 +81,4 @@ def compute_forecast_growth(df):
 
 
 # Automatically load on module import
-load_all_data()
+#load_all_data()
