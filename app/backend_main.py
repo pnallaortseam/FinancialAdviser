@@ -12,6 +12,8 @@ from app.llm_prompt import get_final_stock_advice
 from app.data_cache import load_all_data
 from app.data_fetcher_yfinance import fetch_and_save_all_stocks
 from app.config import settings
+from fastapi.responses import JSONResponse
+
 app = FastAPI()
 
 class UserProfile(BaseModel):
@@ -52,6 +54,10 @@ def on_startup():
 
     print("Loading data into cache...")
     load_all_data()
+
+@app.get("/")
+def health():
+    return JSONResponse({"status": "ok", "message": "FastAPI backend is running."})
 
 @app.post("/recommend")
 async def recommend(user: UserProfile):

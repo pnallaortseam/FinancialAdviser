@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime
 from pathlib import Path
 import glob
-from config  import settings
+from app.config  import settings
 #from env import import_my_env
 import yfinance as yf
 
@@ -144,4 +144,4 @@ def fetch_and_save_all_stocks(stock_list=None) -> dict:
         }
     return results
 
-fetch_and_save_all_stocks()
+#fetch_and_save_all_stocks()

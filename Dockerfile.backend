@@ -12,32 +12,8 @@ COPY . .
 # Add this to copy your data into the container
 COPY app/stocks_data/nifty_500_lst.csv ./stocks_data/nifty_500_lst.csv
 
-# 👇 Set PYTHONPATH to allow `app.` imports
+# Set PYTHONPATH to allow `app.` imports
 ENV PYTHONPATH="${PYTHONPATH}:/code"
 
-# 👇 Fix: use app.backend_main instead of backend_main
-CMD ["uvicorn", "app.backend_main:app", "--host", "127.0.0.1", "--port", "8000"]
+CMD ["uvicorn", "app.backend_main:app", "--host", "0.0.0.0", "--port", "8000"]
 #CMD ["uvicorn", "app.backend_main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
-
-
-# # Dockerfile.backend
-
-# FROM python:3.10-slim
-
-# WORKDIR /app
-
-# # Install OS dependencies if needed
-# RUN apt-get update && apt-get install -y \
-#     build-essential \
-#     curl \
-#     && rm -rf /var/lib/apt/lists/*
-
-# # Copy requirements and install
-# COPY requirements.txt .
-# RUN pip install --no-cache-dir -r requirements.txt
-
-# # Copy all source code
-# COPY . .
-
-# # Run FastAPI app using uvicorn
-# CMD ["uvicorn", "backend_main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
