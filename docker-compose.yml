@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    image: yourusername/finadviser-backend:latest
+    image: nrslearning/finadviser-backend:latest
     container_name: finadviser_backend
     ports:
       - "8000:8000"
@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    image: yourusername/finadviser-frontend:latest
+    image: nrslearning/finadviser-frontend:latest
     container_name: finadviser_frontend
     ports:
       - "8501:8501"
