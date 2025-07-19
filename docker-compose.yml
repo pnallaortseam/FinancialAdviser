@@ -11,18 +11,20 @@ services:
     ports:
       - "8000:8000"
 
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    image: nrslearning/finadviser-frontend:latest
-    container_name: finadviser_frontend
-    ports:
-      - "8501:8501"
-    depends_on:
-      - backend
+# Choose only one UI at a time: chainlit or streamlit  
+  # Streamlit
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.frontend
+  #   image: nrslearning/finadviser-frontend:latest
+  #   container_name: finadviser_frontend
+  #   ports:
+  #     - "8501:8501"
+  #   depends_on:
+  #     - backend
 
-  # Choose only one UI at a time: chainlit or streamlit
+  # Chainlit
   frontend_chainlit:
     build:
       context: .
