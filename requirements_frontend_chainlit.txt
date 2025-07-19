@@ -1,0 +1,5 @@
+chainlit
+langchain
+langchain-google-genai
+requests
+httpx
