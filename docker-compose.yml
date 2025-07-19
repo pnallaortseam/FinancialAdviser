@@ -21,3 +21,15 @@ services:
       - "8501:8501"
     depends_on:
       - backend
+
+  # Choose only one UI at a time: chainlit or streamlit
+  frontend_chainlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.chainlit
+    image: nrslearning/finadviser-frontend-chainlit:latest
+    container_name: finadviser_frontend_chainlit
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
