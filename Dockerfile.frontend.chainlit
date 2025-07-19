@@ -1,0 +1,13 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY requirements_frontend_chainlit.txt .
+
+RUN pip install --no-cache-dir -r requirements_frontend_chainlit.txt
+
+COPY frontend_ui_chainlit.py .
+
+EXPOSE 8501
+
+CMD ["chainlit", "run", "frontend_ui_chainlit.py", "-w"]
