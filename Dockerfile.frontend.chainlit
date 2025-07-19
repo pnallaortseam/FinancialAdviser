@@ -10,4 +10,4 @@ COPY frontend_ui_chainlit.py .
 
 EXPOSE 8501
 
-CMD ["chainlit", "run", "frontend_ui_chainlit.py", "-w"]
+CMD ["chainlit", "run", "frontend_ui_chainlit.py", "--host 0.0.0.0", "--port 8501"]
