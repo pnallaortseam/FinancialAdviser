@@ -150,3 +150,18 @@ docker exec -it finadviser_backend bash
 #Tail backend logs
 docker logs -f finadviser_backend
 
+## Step-by-Step: Push Images to Docker Hub
+# Tag your images correctly. Retag each local image with your Docker Hub username as the prefix:
+#nrslearning/ is my Docker Hub namespace.
+
+docker tag yourusername/finadviser-backend nrslearning/finadviser-backend:latest
+docker tag yourusername/finadviser-frontend nrslearning/finadviser-frontend:latest
+
+# log in to docker hub
+docker login
+docker logout -> to logout
+
+# Push the images 
+docker push nrslearning/finadviser-backend:latest
+docker push nrslearning/finadviser-frontend:latest
+
