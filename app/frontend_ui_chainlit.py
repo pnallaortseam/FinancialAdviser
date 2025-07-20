@@ -255,8 +255,8 @@ async def validate_and_continue(user_inputs):
 
 async def call_backend(user_inputs):
     async with httpx.AsyncClient(timeout=60) as client:
-        #response = await client.post("http://backend:8000/recommend", json=user_inputs)
-        response = await client.post("http://127.0.0.1:8000/recommend", json=user_inputs)
+        response = await client.post("http://backend:8000/recommend", json=user_inputs)
+        #response = await client.post("http://127.0.0.1:8000/recommend", json=user_inputs)
     return response
 
 
