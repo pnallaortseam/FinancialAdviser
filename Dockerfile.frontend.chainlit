@@ -5,6 +5,7 @@ WORKDIR /frontend
 # Copy only what's needed
 COPY app/frontend_ui_chainlit.py app/
 COPY app/env.py app/
+COPY app/static/loading.gif app/static/
 COPY requirements_frontend_chainlit.txt .
 
 RUN pip install --no-cache-dir -r requirements_frontend_chainlit.txt
