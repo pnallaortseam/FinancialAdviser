@@ -4,7 +4,7 @@ import json
 import httpx
 import chainlit as cl
 from langchain_google_genai import ChatGoogleGenerativeAI
-from app.env import import_my_env
+from env import import_my_env
 
 import_my_env()
 llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.1)
