@@ -18,21 +18,52 @@ sector_list = [
 
 questions = [
     ("age", "What is your age? (18–100)", int, lambda x: 18 <= x <= 100),
-    ("monthly_income", "What is your monthly income in INR?", float, lambda x: x >= 0),
+    ("monthly_income", "What is your monthly income in INR?", float, lambda x: x >= 1000),
     ("monthly_expenses", "What are your monthly expenses in INR?", float, lambda x: x >= 0),
-    ("monthly_investment", "How much do you invest monthly in INR?", float, lambda x: x >= 0),
+    ("monthly_investment", "How much do you invest monthly in INR?", float, lambda x: x >= 500),
     ("annual_extra_investment", "Any annual extra investment (INR)?", float, lambda x: x >= 0),
     ("current_savings", "How much are your current savings (INR)?", float, lambda x: x >= 0),
     ("risk_percent", "What is your risk tolerance? (0–100%)", int, lambda x: 0 <= x <= 100),
     ("years", "What is your investment horizon in years?", int, lambda x: 1 <= x <= 20),
     ("expected_returns_percent", "What returns do you expect annually? (1–20%)", int, lambda x: 1 <= x <= 20),
     ("num_dependents", "How many dependents do you have? (0–10)", int, lambda x: 0 <= x <= 10),
-    ("investment_type", "What is your investment style? (Aggressive, Moderate, Slow)", str, lambda x: x in ["Aggressive", "Moderate", "Slow"]),
-    ("investor_knowledge", "What is your investor knowledge level? (Beginner, Intermediate, Expert)", str, lambda x: x in ["Beginner", "Intermediate", "Expert"]),
+    ("investment_type", "What is your investment style? (Aggressive, Moderate, Slow)", str, lambda x: x in ["Aggressive", "Moderate", "Slow", \
+                                                                                                            "aggressive", "moderate", "slow"]),
+    ("investor_knowledge", "What is your investor knowledge level? (Beginner, Intermediate, Expert)", str, lambda x: x in ["Beginner", "Intermediate", "Expert", 
+                                                                                                                           "beginner", "intermediate", "expert"]),
     ("interested_sectors", f"Which sectors are you interested in? Provide a comma-separated list from:{', '.join(sector_list)}", list, lambda x: isinstance(x, list)),
     ("has_health_insurance", "Do you have health insurance? (yes/no)", bool, lambda x: isinstance(x, bool)),
     ("has_emergency_fund", "Do you have an emergency fund? (yes/no)", bool, lambda x: isinstance(x, bool)),
 ]
+
+async def display_user_inputs(user_inputs):
+    formatted = "\n### **User Financial Profile**"
+    formatted += "\n### **Basic Information**"
+    formatted += f"\n- **Age:** {user_inputs.get('age', 'N/A')}"
+    formatted += f"\n- **Dependents:** {user_inputs.get('num_dependents', 'N/A')}"
+    formatted += "\n### **Financial Snapshot**"
+    formatted += f"\n- **Monthly Income    :** ₹{user_inputs.get('monthly_income', 'N/A')}"
+    formatted += f"\n- **Monthly Expenses  :** ₹{user_inputs.get('monthly_expenses', 'N/A')}"
+    formatted += f"\n- **Monthly Investment:** ₹{user_inputs.get('monthly_investment', 'N/A')}"
+    formatted += f"\n- **Annual Extra Investment:** ₹{user_inputs.get('annual_extra_investment', 'N/A')}"
+    formatted += f"\n- **Current Savings:** ₹{user_inputs.get('current_savings', 'N/A')}"
+    formatted += "\n### **Safety Nets**"
+    hi = "✅ *Available*" if user_inputs.get("has_health_insurance") else "❌ *Not available*"
+    ef = "✅ *Available*" if user_inputs.get("has_emergency_fund") else "❌ *Not available*"
+    formatted += f"\n- **Health Insurance:** {hi}"
+    formatted += f"\n- **Emergency Fund:** {ef}"
+    formatted += "\n### **Investment Preferences**"
+    sectors = user_inputs.get("interested_sectors", [])
+    if isinstance(sectors, list):
+        sectors = ", ".join(sectors)
+    formatted += f"\n- **Interested Sectors:** {sectors if sectors else 'N/A'}"
+    formatted += f"\n- **Investor Knowledge:** *{user_inputs.get('investor_knowledge', 'N/A')}*"
+    formatted += f"\n- **Investment Style  :** *{user_inputs.get('investment_type', 'N/A')}*"
+    formatted += f"\n- **Risk Tolerance    :** *{user_inputs.get('risk_percent', 'N/A')}%*"
+    formatted += f"\n- **Investment Horizon:** *{user_inputs.get('years', 'N/A')} years*"
+    formatted += f"\n- **Expected Annual Returns:** *{user_inputs.get('expected_returns_percent', 'N/A')}%*"   
+
+    await cl.Message(content=formatted).send()
 
 def convert_input(value, _type):
     if _type == bool:
@@ -93,14 +124,8 @@ async def ask_next_question():
                 return
             current_index += 1
 
-        prompt = build_user_data_prompt(user_inputs)
-        print(f"##### Prompt: {prompt}")
-        response = llm.invoke(prompt)
-        print(f"##### Response: {response}")
-        raw_output = response.content.strip()
-        clean_output = re.sub(r"^```json\n|```$", "", raw_output, flags=re.MULTILINE).strip()
-        parsed = json.loads(clean_output)
-        user_inputs.update(parsed)
+        user_inputs = await enrich_inputs_with_llm(user_inputs)
+
         cl.user_session.set("user_inputs", user_inputs)
 
         # Validation before backend call
@@ -117,21 +142,22 @@ async def ask_next_question():
         print(f"##### Backend user_inputs:{user_inputs}")
         await cl.Message(content="✅ All inputs collected. Sending to backend...").send()
         
-        async with httpx.AsyncClient(timeout=60) as client:
-            r = await client.post("http://backend:8000/recommend", json=user_inputs)
-            #r = await client.post("http://127.0.0.1:8010/recommend", json=user_inputs)
+        r = await call_backend(user_inputs)
             
         print(f"##### Backend response:{r}")
         if r.status_code == 200:
             await cl.Message(content="📈 Recommendation Result:").send()
             await cl.Message(content=r.json()["advice"]).send()
-            await cl.Message(content="If you like to modify inputs type 'Modify'. If you are done type 'Done'").send()
+            await cl.Message(content="Enter \n 'Modify' -> To change inputs \n \
+                                               'Done' -> To start over \n \
+                                               'Show User inputs' -> To display user inputs").send()
         else:
             await cl.Message(content=f"❌ Backend error: {r.status_code}").send()
 
     except (httpx.RequestError, Exception) as e:
         await cl.Message(content=f"❌ Backend is unreachable or failed: {e}. Restarting session...").send()
         await start()
+
 
 @cl.on_message
 async def handle_msg(msg: cl.Message):
@@ -141,110 +167,35 @@ async def handle_msg(msg: cl.Message):
     if content.lower() == "done":
         await start()
         return
+    
+    if content.lower() == "show user inputs":
+        await display_user_inputs(user_inputs)
+        await cl.Message(content="Enter \n 'Modify' -> To change inputs \n \
+                                           'Done' -> To start over \n \
+                                           'Show User inputs' -> To display user inputs").send()
+        return
 
     if content.lower() == "modify":
-        await cl.Message(content="Please provide the inputs you want to modify from:\n`interested_sectors`, `risk_percent`, `years`, `expected_returns_percent`, `investment_type`").send()
+        await cl.Message(content="Please provide the inputs you want to modify from:\
+                         `interested_sectors`, `risk_percent`, `years`, `expected_returns_percent`, `investment_type`").send()
         cl.user_session.set("awaiting_modification_list", True)
         return
 
     if cl.user_session.get("awaiting_modification_list"):
-        modifiable_keys = ["interested_sectors", "risk_percent", "years", "expected_returns_percent", "investment_type"]
-        requested_keys = [k.strip().lower() for k in content.lower().split(",") if k.strip().lower() in modifiable_keys]
-        if not requested_keys:
-            await cl.Message(content="❌ Invalid fields. Please choose from: " + ", ".join(modifiable_keys)).send()
+        if not await handle_modify_trigger(content):
             return
-        cl.user_session.set("modify", requested_keys)
-        cl.user_session.set("modify_index", 0)
-        cl.user_session.set("awaiting_value", False)
-        cl.user_session.set("awaiting_modification_list", False)
+        # Await next input to process
 
     if cl.user_session.get("modify") is not None:
-        modify_keys = cl.user_session.get("modify")
-        modify_index = cl.user_session.get("modify_index", 0)
-        awaiting_value = cl.user_session.get("awaiting_value", False)
-
-        if awaiting_value and modify_index < len(modify_keys):
-            mod_key = modify_keys[modify_index]
-            for key, question, _type, validator in questions:
-                if key == mod_key:
-                    try:
-                        value = convert_input(content, _type)
-                        if not validator(value):
-                            raise ValueError()
-                        user_inputs[key] = value.title() if isinstance(value, str) else value
-                        cl.user_session.set("user_inputs", user_inputs)
-                        cl.user_session.set("modify_index", modify_index + 1)
-                        cl.user_session.set("awaiting_value", False)
-                        
-                        # ✅ validate just the modified field
-                        validation_errors = validate_user_inputs(user_inputs)
-                        if validation_errors:
-                            await cl.Message(content="❌ Validation error:\n" + "\n".join(validation_errors)).send()
-                            await cl.Message(content=f"Let's update: {questions[current_index][1]}").send()
-                            return
-                    except:
-                        await cl.Message(content="❌ Invalid input. Please try again.").send()
-                        await cl.Message(content=question).send()
-                        return
-
-        if cl.user_session.get("modify_index", 0) < len(modify_keys):
-            mod_key = modify_keys[cl.user_session.get("modify_index")]
-            for key, question, *_ in questions:
-                if key == mod_key:
-                    cl.user_session.set("awaiting_value", True)
-                    await cl.Message(content=f"🔁 Let's update: {question}").send()
-                    return
-        else:
-            cl.user_session.set("modify", None)
-            cl.user_session.set("modify_index", 0)
-            cl.user_session.set("awaiting_value", False)
-            prompt = build_user_data_prompt(user_inputs)
-            print(f"##### Prompt: {prompt}")
-            response = llm.invoke(prompt)
-            print(f"##### Response: {response}")
-            raw_output = response.content.strip()
-            clean_output = re.sub(r"^```json\n|```$", "", raw_output, flags=re.MULTILINE).strip()
-            try:
-                parsed = json.loads(clean_output)
-                user_inputs.update(parsed)
-                cl.user_session.set("user_inputs", user_inputs)
-
-                # Validation before backend call
-                validation_errors = validate_user_inputs(user_inputs)
-                if validation_errors:
-                    error_message = "❌ **Validation errors detected:**\n\n"
-                    for err in validation_errors:
-                        error_message += f"- {err}\n"
-
-                    await cl.Message(content=error_message).send()
-                    await start()  # Restart input flow from the beginning
-                    return
-                
-                print(f"##### Backend user_inputs:{user_inputs}")
-                await cl.Message(content="✅ Inputs updated. Sending to backend...").send()
-                try:
-                    async with httpx.AsyncClient(timeout=60) as client:
-                        r = await client.post("http://backend:8000/recommend", json=user_inputs)
-                        #r = await client.post("http://127.0.0.1:8010/recommend", json=user_inputs)
-                        
-                        
-                    print(f"##### Backend response:{r}")
-                    if r.status_code == 200:
-                        await cl.Message(content="📈 Updated Recommendation:").send()
-                        await cl.Message(content=r.json()["advice"]).send()
-                        await cl.Message(content="Type `Modify` to change inputs or `Done` to start over.").send()
-                    else:
-                        await cl.Message(content=f"❌ Backend error: {r.status_code}").send()
-                except (httpx.RequestError, Exception) as e:
-                    await cl.Message(content=f"❌ Backend is unreachable or failed: {e}. Restarting session...").send()
-                    await start()
-            except Exception as e:
-                await cl.Message(content=f"❌ Failed to parse JSON: {e}").send()
+        if await process_modification(content, user_inputs):
             return
 
     current_index = cl.user_session.get("current_index")
     if current_index >= len(questions):
-        await cl.Message(content="✅ All inputs collected. Type 'Done' to restart or 'Modify' to change inputs.").send()
+        await cl.Message(content="✅ All inputs collected.\n \
+                                  Enter \n 'Modify' -> To change inputs \n \
+                                           'Done' -> To start over \n \
+                                           'Show User inputs' -> To display user inputs").send()
         return
 
     key, question, _type, validator = questions[current_index]
@@ -259,6 +210,7 @@ async def handle_msg(msg: cl.Message):
     except:
         await cl.Message(content="❌ Invalid input. Please try again.").send()
         await cl.Message(content=question).send()
+
 
 def validate_user_inputs(user_inputs):
     errors = []
@@ -288,3 +240,100 @@ def validate_user_inputs(user_inputs):
         if user_inputs["monthly_expenses"] > user_inputs["monthly_income"]:
             errors.append("Monthly expenses cannot exceed monthly income.")
     return errors
+
+
+async def validate_and_continue(user_inputs):
+    validation_errors = validate_user_inputs(user_inputs)
+    if validation_errors:
+        error_message = "❌ **Validation errors detected:**"
+        for err in validation_errors:
+            error_message += f"- {err}"
+        await cl.Message(content=error_message).send()
+        await start()
+        return False
+    return True
+
+async def call_backend(user_inputs):
+    async with httpx.AsyncClient(timeout=60) as client:
+        #response = await client.post("http://backend:8000/recommend", json=user_inputs)
+        response = await client.post("http://127.0.0.1:8000/recommend", json=user_inputs)
+    return response
+
+
+async def handle_modify_trigger(msg_content):
+    modifiable_keys = ["interested_sectors", "risk_percent", "years", "expected_returns_percent", "investment_type"]
+    requested_keys = [k.strip().lower() for k in msg_content.lower().split(",") if k.strip().lower() in modifiable_keys]
+    if not requested_keys:
+        await cl.Message(content="❌ Invalid fields. Please choose from: " + ", ".join(modifiable_keys)).send()
+        return False
+    cl.user_session.set("modify", requested_keys)
+    cl.user_session.set("modify_index", 0)
+    cl.user_session.set("awaiting_value", False)
+    cl.user_session.set("awaiting_modification_list", False)
+    return True
+
+async def enrich_inputs_with_llm(user_inputs):
+    prompt = build_user_data_prompt(user_inputs)
+    response = llm.invoke(prompt)
+    raw_output = response.content.strip()
+    clean_output = re.sub(r"^```json|```$", "", raw_output, flags=re.MULTILINE).strip()
+    parsed = json.loads(clean_output)
+    user_inputs.update(parsed)
+    cl.user_session.set("user_inputs", user_inputs)
+    return user_inputs
+
+async def process_modification(content, user_inputs):
+    modify_keys = cl.user_session.get("modify")
+    modify_index = cl.user_session.get("modify_index", 0)
+    awaiting_value = cl.user_session.get("awaiting_value", False)
+
+    if awaiting_value and modify_index < len(modify_keys):
+        mod_key = modify_keys[modify_index]
+        for key, question, _type, validator in questions:
+            if key == mod_key:
+                try:
+                    value = convert_input(content, _type)
+                    if not validator(value):
+                        raise ValueError()
+                    user_inputs[key] = value.title() if isinstance(value, str) else value
+                    cl.user_session.set("user_inputs", user_inputs)
+                    cl.user_session.set("modify_index", modify_index + 1)
+                    cl.user_session.set("awaiting_value", False)
+                except:
+                    await cl.Message(content="❌ Invalid input. Please try again.").send()
+                    await cl.Message(content=question).send()
+                    return True
+
+    # still in modification flow
+    if cl.user_session.get("modify_index", 0) < len(modify_keys):
+        mod_key = modify_keys[cl.user_session.get("modify_index")]
+        for key, question, *_ in questions:
+            if key == mod_key:
+                cl.user_session.set("awaiting_value", True)
+                await cl.Message(content=f"🔁 Let's update: {question}").send()
+                return True
+    else:
+        cl.user_session.set("modify", None)
+        cl.user_session.set("modify_index", 0)
+        cl.user_session.set("awaiting_value", False)
+
+        user_inputs = await enrich_inputs_with_llm(user_inputs)
+
+        if not await validate_and_continue(user_inputs): return True
+
+        await cl.Message(content="✅ Inputs updated. Sending to backend...").send()
+        try:
+            r = await call_backend(user_inputs)
+            if r.status_code == 200:
+                await cl.Message(content="📈 Updated Recommendation:").send()
+                await cl.Message(content=r.json()["advice"]).send()
+                await cl.Message(content="Enter \n 'Modify' -> To change inputs \n \
+                                                   'Done' -> To start over \n \
+                                                   'Show User inputs' -> To display user inputs").send()
+            else:
+                await cl.Message(content=f"❌ Backend error: {r.status_code}").send()
+        except (httpx.RequestError, Exception) as e:
+            await cl.Message(content=f"❌ Backend is unreachable or failed: {e}. Restarting session...").send()
+            await start()
+        return True
+    return True
