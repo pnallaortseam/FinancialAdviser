@@ -4,7 +4,7 @@ import json
 import httpx
 import chainlit as cl
 from langchain_google_genai import ChatGoogleGenerativeAI
-from env import import_my_env
+from app.env import import_my_env
 
 import_my_env()
 llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.1)
@@ -17,23 +17,80 @@ sector_list = [
     "Oil Gas & Consumable Fuels", "Power", "Realty", "Services", "Telecommunication", "Textiles"]
 
 questions = [
-    ("age", "What is your age? (18–100)", int, lambda x: 18 <= x <= 100),
-    ("monthly_income", "What is your monthly income in INR?", float, lambda x: x >= 1000),
-    ("monthly_expenses", "What are your monthly expenses in INR?", float, lambda x: x >= 0),
-    ("monthly_investment", "How much do you invest monthly in INR?", float, lambda x: x >= 500),
-    ("annual_extra_investment", "Any annual extra investment (INR)?", float, lambda x: x >= 0),
-    ("current_savings", "How much are your current savings (INR)?", float, lambda x: x >= 0),
-    ("risk_percent", "What is your risk tolerance? (0–100%)", int, lambda x: 0 <= x <= 100),
-    ("years", "What is your investment horizon in years?", int, lambda x: 1 <= x <= 20),
-    ("expected_returns_percent", "What returns do you expect annually? (1–20%)", int, lambda x: 1 <= x <= 20),
-    ("num_dependents", "How many dependents do you have? (0–10)", int, lambda x: 0 <= x <= 10),
-    ("investment_type", "What is your investment style? (Aggressive, Moderate, Slow)", str, lambda x: x in ["Aggressive", "Moderate", "Slow", \
-                                                                                                            "aggressive", "moderate", "slow"]),
-    ("investor_knowledge", "What is your investor knowledge level? (Beginner, Intermediate, Expert)", str, lambda x: x in ["Beginner", "Intermediate", "Expert", 
-                                                                                                                           "beginner", "intermediate", "expert"]),
-    ("interested_sectors", f"Which sectors are you interested in? Provide a comma-separated list from:{', '.join(sector_list)}", list, lambda x: isinstance(x, list)),
-    ("has_health_insurance", "Do you have health insurance? (yes/no)", bool, lambda x: isinstance(x, bool)),
-    ("has_emergency_fund", "Do you have an emergency fund? (yes/no)", bool, lambda x: isinstance(x, bool)),
+    ("age", "🎂 How young at heart are you? (Enter your age between 18 and 100)", int, lambda x: 18 <= x <= 100),
+
+    ("monthly_income", "💸 What's your average monthly income in INR?\n(Include all sources – job, business, rent, etc.)", float, lambda x: x >= 1000),
+
+    ("monthly_expenses", "🧾 What do you typically spend in a month? (INR)\n(This includes rent, groceries, travel, etc.)", float, lambda x: x >= 0),
+
+    ("monthly_investment", "📈 How much do you usually invest each month? (INR)\n(e.g. SIPs, stocks, mutual funds, etc.)", float, lambda x: x >= 500),
+
+    ("annual_extra_investment", "🎁 Any yearly bonus or lump sum investments? (INR)\n(Think of things like Diwali bonuses, tax savings, etc.)", float, lambda x: x >= 0),
+
+    ("current_savings", "🏦 What's your current total savings? (INR)\n(This can include your bank balance, FDs, liquid funds, etc.)", float, lambda x: x >= 0),
+
+    ("risk_percent", 
+     "⚖️ How much risk are you comfortable with on a scale of 0 to 100?\n"
+     " - Lower value -> can’t tolerate losing anything\n"
+     " - Higher value -> ready to ride the rollercoaster for higher returns!",
+     int, lambda x: 0 <= x <= 100
+    ),
+
+    ("years", 
+     "📆 How long do you plan to invest for?\n"
+     "(Enter number of years: 1 to 20)\nTip: Longer horizons allow more aggressive investing.", 
+     int, lambda x: 1 <= x <= 20
+    ),
+
+    ("expected_returns_percent", 
+     "📊 What annual return do you hope to achieve? (1–20%)\nBe realistic! High returns usually mean higher risk.", 
+     int, lambda x: 1 <= x <= 20
+    ),
+
+    ("num_dependents", 
+     "👨‍👩‍👧‍👦 How many people financially depend on you?\n(Think spouse, children, parents — enter a number 0–10)", 
+     int, lambda x: 0 <= x <= 10
+    ),
+
+    ("investment_type", 
+     "🧭 How would you describe your investment style?\n\n"
+     "- **Aggressive** 🐯: You chase growth, even if it's bumpy. Volatile stocks, small caps, startups — you're in.\n"
+     "- **Moderate** 🦉: Balanced and smart. You mix safer bets (like blue-chips) with growth potential.\n"
+     "- **Slow** 🐢: Steady and secure. You prefer minimal-risk investments like FDs, bonds, or dividend stocks.\n\n"
+     "👉 Type your choice: (Aggressive, Moderate, Slow)",
+     str,
+     lambda x: x.lower() in ["aggressive", "moderate", "slow"]
+    ),
+
+    ("investor_knowledge", 
+     "📚 What’s your comfort level with investing?\n\n"
+     "- **Beginner** 🐣: You're learning — maybe done a few SIPs or watched YouTube videos.\n"
+     "- **Intermediate** 🧑‍💻: You’ve used investment platforms and understand market basics.\n"
+     "- **Expert** 🧠: You follow market news, know how to read balance sheets, maybe even day-trade!\n\n"
+     "👉 Choose one: (Beginner, Intermediate, Expert)", 
+     str, lambda x: x.lower() in ["beginner", "intermediate", "expert"]
+    ),
+
+    # ("interested_sectors", 
+    #  f"🏭 Which sectors excite you the most?\nHere’s a list you can pick from:\n\n{', '.join(sector_list)}\n\n"
+    #  "👉 Type your choices as a comma-separated list (e.g., IT, Healthcare, Financial Services)", 
+    #  list, lambda x: isinstance(x, list)
+    # ),
+    ("interested_sectors", 
+     f"🏭 Which sectors excite you the most?\nHere’s a list you can pick from:\n\n{', '.join(sector_list)}\n\n"
+    "👉 Type your choices as a comma-separated list (or leave blank for no preference)", 
+    list, lambda x: isinstance(x, list)
+    ),
+
+    ("has_health_insurance", 
+     "🩺 Do you have health insurance coverage for yourself/family? (yes/no)\nThis helps protect your finances from unexpected medical costs.",
+     bool, lambda x: isinstance(x, bool)
+    ),
+
+    ("has_emergency_fund", 
+     "🚨 Do you have an emergency fund ready? (yes/no)\nUsually 3–6 months of expenses, in case of job loss, illness, etc.",
+     bool, lambda x: isinstance(x, bool)
+    ),
 ]
 
 async def display_user_inputs(user_inputs):
@@ -70,11 +127,15 @@ def convert_input(value, _type):
         return value.lower() in ["yes", "true", "1"]
     # if _type == list:
     #     selected = [v.strip().lower() for v in value.split(",")]
-    #     return [s for s in sector_list if s.lower() in selected or any(s.lower() == part for part in selected)]
+    #     valid = [s for s in sector_list if s.lower() in selected]
+    #     return valid  # this will return [] if input was invalid, which validator will catch
+
     if _type == list:
+        if not value.strip():  # Accept blank string
+            return []
         selected = [v.strip().lower() for v in value.split(",")]
         valid = [s for s in sector_list if s.lower() in selected]
-        return valid  # this will return [] if input was invalid, which validator will catch
+        return valid
 
     return _type(value)
 
@@ -103,6 +164,20 @@ def build_user_data_prompt(data):
         }"""
     return prompt
 
+
+# --- New Utility Functions for Classification ---
+async def classify_query_type(user_msg: str) -> str:
+    prompt = f"""Classify the following user query into one of: \"Modify\", \"Q&A\", or \"Not related\".
+                 Query: \"{user_msg}\"
+                 Respond with only one of these words: Modify, Q&A, Not related."""
+    result = llm.invoke(prompt).content.strip()
+    return result
+
+async def is_stock_advice_related(user_question: str) -> bool:
+    prompt = f"""Decide if this user question is related to the stock or stock symbol or company advice they received. Answer \"Yes\" or \"No\".
+Question: \"{user_question}\" """
+    return "yes" in llm.invoke(prompt).content.strip().lower()
+
 @cl.on_chat_start
 async def start():
     cl.user_session.set("user_inputs", {})
@@ -110,7 +185,13 @@ async def start():
     cl.user_session.set("modify", None)
     cl.user_session.set("modify_index", 0)
     cl.user_session.set("awaiting_value", False)
-    await cl.Message(content="Welcome to Financial Adviser! Let's gather some information to personalize your stock advice.").send()
+    #await cl.Message(content="Welcome to Financial Adviser! Let's gather some information to personalize your stock advice.").send()
+    await cl.Message(content="""
+                        📈 **Welcome to Financial Adviser!**
+                        We're excited to have you on board. Your journey to smarter, more personalized investing starts here. 🚀
+                        We'll begin by gathering a few details about your financial goals, risk tolerance, and interests. This helps us tailor stock insights and strategies that *fit you perfectly*.
+                        **Ready to unlock your investment potential? Let’s get started! 💼💡**
+                        """).send()
     await ask_next_question()
 
 async def ask_next_question():
@@ -140,7 +221,10 @@ async def ask_next_question():
             return
 
         print(f"##### Backend user_inputs:{user_inputs}")
-        await cl.Message(content="✅ All inputs collected. Sending to backend...").send()
+        await display_user_inputs(user_inputs)
+        #await cl.Message(content="✅ All inputs collected. Sending to backend...").send()
+        await cl.Message(content="⏳ Analyzing your financial profile. This may take a few moments...",
+                         elements=[cl.Image(name="loading", path="static/loading.gif", display="inline")]).send()
         
         r = await call_backend(user_inputs)
             
@@ -148,9 +232,10 @@ async def ask_next_question():
         if r.status_code == 200:
             await cl.Message(content="📈 Recommendation Result:").send()
             await cl.Message(content=r.json()["advice"]).send()
-            await cl.Message(content="Enter \n 'Modify' -> To change inputs \n \
-                                               'Done' -> To start over \n \
-                                               'Show User inputs' -> To display user inputs").send()
+            # await cl.Message(content="Enter \n 'Modify' -> To change inputs \n \
+            #                                    'Done' -> To start over \n \
+            #                                    'Show User inputs' -> To display user inputs").send()
+            await cl.Message(content="💬 Would you like to modify any inputs or ask a question about the above advice? Just type your message.").send()
         else:
             await cl.Message(content=f"❌ Backend error: {r.status_code}").send()
 
@@ -158,44 +243,85 @@ async def ask_next_question():
         await cl.Message(content=f"❌ Backend is unreachable or failed: {e}. Restarting session...").send()
         await start()
 
-
 @cl.on_message
 async def handle_msg(msg: cl.Message):
     content = msg.content.strip()
     user_inputs = cl.user_session.get("user_inputs")
 
-    if content.lower() == "done":
-        await start()
-        return
-    
+
     if content.lower() == "show user inputs":
-        await display_user_inputs(user_inputs)
-        await cl.Message(content="Enter \n 'Modify' -> To change inputs \n \
-                                           'Done' -> To start over \n \
-                                           'Show User inputs' -> To display user inputs").send()
+        print("****** Skip 'show user inputs'")
+        # await display_user_inputs(user_inputs)
+        # await cl.Message(content="💬 Would you like to modify any inputs or ask a question about the above advice? Just type your message.").send()
         return
 
     if content.lower() == "modify":
-        await cl.Message(content="Please provide the inputs you want to modify from:\
-                         `interested_sectors`, `risk_percent`, `years`, `expected_returns_percent`, `investment_type`").send()
+        await cl.Message(content="Please provide the inputs you want to modify from:\n`interested_sectors`, `risk_percent`, `years`, `expected_returns_percent`, `investment_type`").send()
         cl.user_session.set("awaiting_modification_list", True)
         return
 
     if cl.user_session.get("awaiting_modification_list"):
         if not await handle_modify_trigger(content):
             return
-        # Await next input to process
 
     if cl.user_session.get("modify") is not None:
         if await process_modification(content, user_inputs):
             return
 
+    if cl.user_session.get("awaiting_qa"):
+        msg_lower = content.lower()
+        if any(kw in msg_lower for kw in ["modify", "change", "update"]):
+            cl.user_session.set("awaiting_qa", False)
+            cl.user_session.set("awaiting_modification_list", True)
+            await cl.Message(content="Please specify what you'd like to modify:\n`interested_sectors`, `risk_percent`, `years`, `expected_returns_percent`, `investment_type`.").send()
+            return
+
+        if any(kw in msg_lower for kw in ["start over", "reset", "restart", "provide all inputs"]):
+            cl.user_session.set("awaiting_qa", False)
+            await start()
+            return
+
+        cl.user_session.set("awaiting_qa", False)
+        if await is_stock_advice_related(content):
+            stock_advice = cl.user_session.get("last_advice", "")
+            qa_prompt = f"""You are a financial assistant. The user received the following advice:
+                            {stock_advice}
+                            They have now asked this follow-up question:
+                            {content}
+                            Provide a helpful response."""
+            answer = llm.invoke(qa_prompt).content
+            await cl.Message(content=answer).send()
+        else:
+            await cl.Message(content="❌ This question doesn't seem related to the provided stock advice.").send()
+        cl.user_session.set("awaiting_qa", True)
+        await cl.Message(content="💬 You can continue asking questions related to the advice. Type your query below.").send()
+        return
+
     current_index = cl.user_session.get("current_index")
-    if current_index >= len(questions):
-        await cl.Message(content="✅ All inputs collected.\n \
-                                  Enter \n 'Modify' -> To change inputs \n \
-                                           'Done' -> To start over \n \
-                                           'Show User inputs' -> To display user inputs").send()
+    if current_index >= len(questions) and not cl.user_session.get("awaiting_qa"):
+        query_type = await classify_query_type(content)
+        if query_type.lower() == "modify":
+            await cl.Message(content="Please specify what you'd like to modify.").send()
+            cl.user_session.set("awaiting_modification_list", True)
+            return
+        elif query_type.lower() == "q&a":
+            if await is_stock_advice_related(content):
+                stock_advice = cl.user_session.get("last_advice", "")
+                qa_prompt = f"""You are a financial assistant. The user received the following advice:\n\n{stock_advice}\n\nThey have now asked this follow-up question:\n{content}\n\nProvide a helpful response."""
+                answer = llm.invoke(qa_prompt).content
+                await cl.Message(content=answer).send()
+                cl.user_session.set("awaiting_qa", True)
+                await cl.Message(content="💬 You can continue asking questions related to the advice. Type your query below.").send()
+            else:
+                cl.user_session.set("awaiting_qa", True)
+                await cl.Message(content="🔍 What's your question regarding the provided stock advice?").send()
+            return
+        elif query_type.lower() == "not related":
+            await cl.Message(content="❌ This query doesn't seem related to stock advice. Please try something else.").send()
+            await cl.Message(content="💬 Would you like to modify any inputs or ask more questions?").send()
+            return
+        else:
+            await cl.Message(content="Unrecognized input. Please type 'Modify' or 'Done'.").send()
         return
 
     key, question, _type, validator = questions[current_index]
@@ -255,8 +381,8 @@ async def validate_and_continue(user_inputs):
 
 async def call_backend(user_inputs):
     async with httpx.AsyncClient(timeout=60) as client:
-        response = await client.post("http://backend:8000/recommend", json=user_inputs)
-        #response = await client.post("http://127.0.0.1:8000/recommend", json=user_inputs)
+        #response = await client.post("http://backend:8000/recommend", json=user_inputs)
+        response = await client.post("http://127.0.0.1:8000/recommend", json=user_inputs)
     return response
 
 
@@ -319,17 +445,22 @@ async def process_modification(content, user_inputs):
 
         user_inputs = await enrich_inputs_with_llm(user_inputs)
 
-        if not await validate_and_continue(user_inputs): return True
+        if not await validate_and_continue(user_inputs): 
+            return True
 
-        await cl.Message(content="✅ Inputs updated. Sending to backend...").send()
+        await display_user_inputs(user_inputs)
+        #await cl.Message(content="✅ Inputs updated. Sending to backend...").send()
+        await cl.Message(content="⏳ Analyzing your financial profile. This may take a few moments...",
+                    elements=[cl.Image(name="loading", path="static/loading.gif", display="inline")]).send()
         try:
             r = await call_backend(user_inputs)
             if r.status_code == 200:
                 await cl.Message(content="📈 Updated Recommendation:").send()
                 await cl.Message(content=r.json()["advice"]).send()
-                await cl.Message(content="Enter \n 'Modify' -> To change inputs \n \
-                                                   'Done' -> To start over \n \
-                                                   'Show User inputs' -> To display user inputs").send()
+                # await cl.Message(content="Enter \n 'Modify' -> To change inputs \n \
+                #                                    'Done' -> To start over \n \
+                #                                    'Show User inputs' -> To display user inputs").send()
+                await cl.Message(content="💬 Would you like to modify any inputs or ask a question about the above advice? Just type your message.").send()
             else:
                 await cl.Message(content=f"❌ Backend error: {r.status_code}").send()
         except (httpx.RequestError, Exception) as e:
