@@ -51,13 +51,18 @@ def rank_top_stocks(user_input: dict) -> list[str]:
 
     for symbol in settings.INDEX_STOCKS:
         try:
-            # temp += 1
-            # if temp > 50:
-            #     break
-
             if symbol not in ohlc_data or symbol not in news_data or symbol not in fundamentals_data:
                 continue
+            
+            # Get sector from external file instead of fundamentals
+            sector = symbol_to_sector.get(symbol, "")
 
+            #If it is not the sector of intrest skip
+            if sector_prefs and all(pref not in sector for pref in sector_prefs):
+                continue
+            
+            print(f"{symbol}\t: \t {sector}")
+            
             growth = forecast_data.get(symbol, 0.0)
             df = ohlc_data[symbol].copy()
             df["returns"] = df["Close"].pct_change()
@@ -69,12 +74,7 @@ def rank_top_stocks(user_input: dict) -> list[str]:
             fundamentals_df = fundamentals_data[symbol]
             pe = float(fundamentals_df.get("trailingPE", [40])[0])
 
-            # Get sector from external file instead of fundamentals
-            sector = symbol_to_sector.get(symbol, "")
-            print(f"{symbol}\t: \t {sector}")
-            
             score = 0
-
             if sector_prefs and any(pref in sector for pref in sector_prefs):
                 score += 10
 
