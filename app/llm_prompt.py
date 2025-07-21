@@ -14,6 +14,13 @@ def build_structured_prompt(user_input, stock_summaries: dict):
         "For each selected stock, provide ONLY: (1) one-line summary (e.g. good growth, or strong sentiment), (2) one-line concern (e.g. high P/E, or weak margins), and (3) Expected growth percentage (4) percentage to invest.(e.g Invest: 10%)"
         "Keep each stock's section brief (max 2 lines + %)."
         "End with a final summary table showing percentage allocation."
+        "At the end add Cautionary banner"
+        "Caution: The following response is generated based on your\
+         current financial inputs and historical data patterns.\
+         It is intended solely for informational purposes. \
+         The stock market involves inherent risk, and past performance \
+         does not guarantee future results. This is not personalized financial advice.\
+         Please consult a certified financial advisor before making any investment decisions."
         "\nHere is an example format you must follow exactly:\n"
         "1. SOLARA\n"
            "Summary: High growth potential with strong margin improvement.\n"
@@ -67,6 +74,6 @@ def get_final_stock_advice(user_input: dict, stock_summaries: dict) -> tuple[str
     print(prompt)
     print("\n###### Prompt - End  #####\n")
     result = llm.invoke(prompt)
+    print(f"\n###### result.content  #####\n {result.content}")
     #return result.content
     return result.content, stock_summaries
-
