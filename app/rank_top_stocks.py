@@ -33,6 +33,15 @@ def compute_user_resilience(user):
     if user["monthly_investment"] < 0.1 * user["monthly_income"]:
         resilience -= 5
 
+    if user["age"] >= 18 and user["age"] < 25:
+        resilience += 10
+    elif user["age"] >= 25 and user["age"] < 40:
+        resilience += 7
+    elif user["age"] >= 40 and user["age"] < 50:
+        resilience += 5
+    elif user["age"] >= 50:
+        resilience += 2
+
     return resilience
 
 def rank_top_stocks(user_input: dict) -> list[str]:
