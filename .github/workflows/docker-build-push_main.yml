@@ -32,15 +32,15 @@ jobs:
         build-args: |
           GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
 
-    - name: 📦 Build and Push Frontend Image
+    - name: 📦 Build and Push Streamlit Frontend Image
       uses: docker/build-push-action@v5
       with:
         context: .
         file: ./Dockerfile.frontend
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/finadviser-frontend:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/finadviser-frontend-streamlit:latest
 
-    - name: 📦 Build and Push Frontend Image
+    - name: 📦 Build and Push Chainlit Frontend Image
       uses: docker/build-push-action@v5
       with:
         context: .

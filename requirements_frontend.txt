@@ -2,4 +2,8 @@ streamlit
 pandas
 matplotlib
 fpdf
+httpx
+langchain
+langchain-google-genai
+requests
 #python-dotenv

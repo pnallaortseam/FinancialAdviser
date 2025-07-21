@@ -5,7 +5,7 @@ import requests
 from fpdf import FPDF
 import json
 from langchain_google_genai import ChatGoogleGenerativeAI
-from app.env import import_my_env
+from env import import_my_env
 
 import_my_env()
 llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.1)
@@ -41,8 +41,7 @@ def func():
             "has_emergency_fund": has_emergency_fund,
         }
 
-        #st.subheader("📡 Sending to backend...")
-        with st.spinner("⏳ Analyzing your financial profile. This may take a few moments..."):
+        with st.spinner("Analyzing your financial profile. This may take a few moments..."):
             try:
                 #response = requests.post("http://127.0.0.1:8000/recommend", json=user_data)
                 response = call_backend(user_data)

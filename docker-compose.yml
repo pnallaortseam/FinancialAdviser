@@ -12,26 +12,26 @@ services:
       - "8000:8000"
 
 # Choose only one UI at a time: chainlit or streamlit  
-  # Streamlit
-  # frontend:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.frontend
-  #   image: nrslearning/finadviser-frontend:latest
-  #   container_name: finadviser_frontend
-  #   ports:
-  #     - "8501:8501"
-  #   depends_on:
-  #     - backend
-
-  # Chainlit
-  frontend_chainlit:
+# Streamlit
+  frontend_streamlit:
     build:
       context: .
-      dockerfile: Dockerfile.frontend.chainlit
-    image: nrslearning/finadviser-frontend-chainlit:latest
-    container_name: finadviser_frontend_chainlit
+      dockerfile: Dockerfile.frontend
+    image: nrslearning/finadviser-frontend-streamlit:latest
+    container_name: finadviser_frontend_streamlit
     ports:
       - "8501:8501"
     depends_on:
       - backend
+
+  # Chainlit
+  # frontend_chainlit:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.frontend.chainlit
+  #   image: nrslearning/finadviser-frontend-chainlit:latest
+  #   container_name: finadviser_frontend_chainlit
+  #   ports:
+  #     - "8501:8501"
+  #   depends_on:
+  #     - backend

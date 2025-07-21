@@ -4,6 +4,7 @@ WORKDIR /frontend
 
 # Copy only what's needed
 COPY app/frontend_ui.py app/
+COPY app/env.py app/
 COPY requirements_frontend.txt .
 
 RUN pip install --no-cache-dir -r requirements_frontend.txt
