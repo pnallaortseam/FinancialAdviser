@@ -20,7 +20,7 @@ def call_backend(user_inputs):
         st.error(f"Request failed: {e}")
         return None
                     
-def func():
+def func(llm):
     # Submit button
     if st.button("📤 Get Stock Advice"):
         user_data = {
@@ -43,7 +43,6 @@ def func():
 
         with st.spinner("Analyzing your financial profile. This may take a few moments..."):
             try:
-                #response = requests.post("http://127.0.0.1:8000/recommend", json=user_data)
                 response = call_backend(user_data)
                 if response.status_code == 200:
                     advice_data = response.json()
@@ -74,7 +73,7 @@ def func():
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
 
-        llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.1)
+        #llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.1)
 
         user_msg = st.chat_input("Ask a question related to your stock advice...")
 
@@ -85,12 +84,15 @@ def func():
                             Here is the user's financial profile and backend-generated recommendation:\n\
                             {json.dumps(st.session_state["advice_data"], indent=2)}\n\nNow the user asks:\n\
                             {user_msg} \n\n\
-                            Please provide a clear, factual, and helpful response."""
+                            Please provide a clear, factual, and helpful response.
+                            If the question is not related to finance, politely reject it and instruct the user to ask only finance-related questions.
+                            """
 
-            try:
-                response = llm.invoke(full_prompt).content.strip()
-            except Exception as e:
-                response = f"⚠️ Failed to fetch LLM response: {e}"
+            with st.spinner("Analyzing your advice and crafting a smart response..."):
+              try:
+                  response = llm.invoke(full_prompt).content.strip()
+              except Exception as e:
+                  response = f"⚠️ Failed to fetch LLM response: {e}"
 
             # with st.chat_message("assistant"):
             #     st.markdown(response)
@@ -123,7 +125,7 @@ st.markdown("""<style>
 </style>""", unsafe_allow_html=True)
 
 
-st.title("💰 Intelligent Financial Adviser")
+st.title("🤖 Intelligent 💰 Financial Adviser")
 
 #st.markdown("Welcome! Please fill out your financial profile below:")
 st.markdown("📈 **Welcome to Financial Adviser!** \n\
@@ -151,37 +153,38 @@ with col1:
 
     # Define inputs
     st.markdown("### 👤 Basic Information")
-    age = st.number_input("🎂 How young at heart are you?\n (Enter your age between 18 and 100)", min_value=18, max_value=100)
+    age = st.number_input("🎂 How young at heart are you?\n (Enter your age between 18 and 100)", min_value=18, max_value=100, value=25)
 
     st.markdown("### 💰 Income & Expenses")
 
     monthly_income = st.number_input("💸 What's your average monthly income in INR?\n",
-                                     min_value=1000,
-                                     step=100,
+                                     min_value=10000,
+                                     step=1000,
+                                     value=50000,
                                      help="(Include all sources – job, business, rent, etc.)")
     monthly_expenses = st.number_input("🧾 What do you typically spend in a month? (INR)\n",
-                                       min_value=0,
-                                       step=100,
+                                       min_value=5000,
+                                       step=1000,
+                                       value=20000,
                                        help="(This includes rent, groceries, travel, etc.)")
     monthly_investment = st.number_input("📈 How much do you usually invest each month? (INR)\n",
-                                         min_value=500,
-                                         step=100,
+                                         min_value=5000,
+                                         step=1000,
+                                         value=20000,
                                          help="(e.g. SIPs, stocks, mutual funds, etc.)")
     annual_extra_investment = st.number_input("🎁 Any yearly bonus or lump sum investments? (INR)\n",
                                               min_value=0,
-                                              step=100,
+                                              step=1000,
                                               help="(Think of things like Diwali bonuses, tax savings, etc.)")
     current_savings = st.number_input("🏦 What's your current total savings? (INR)\n",
                                       min_value=0,
                                       step=100,
                                       help="(This can include your bank balance, FDs, liquid funds, etc.)")
-    
-    risk_percent = st.slider("⚖️ How much risk are you comfortable with on a scale of 0 to 100?",
+    risk_percent = st.slider("⚖️ How much risk are you comfortable with on a scale of 0 to 100%?",
                             min_value=0, max_value=100,
                             value=5, step=1,
                             help="Lower value → Less risky stocks to protect investment. Higher → open to volatility for more returns.")
-    
-    years = st.slider("📆 How long do you plan to invest for?", 
+    years = st.slider("📆 How long do you plan to invest for in years?", 
                       min_value=0, max_value=20,
                       value=1, step=1,
                       help="Longer duration allows more aggressive and growth-oriented investments.")
@@ -241,4 +244,4 @@ with col2:
     elif monthly_investment > (monthly_income - monthly_expenses):
         st.error("Monthly investment cannot exceed disposable income.")
     else:
-        func()
+        func(llm)
