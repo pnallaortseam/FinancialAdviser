@@ -45,9 +45,9 @@ def rank_top_stocks(user_input: dict) -> list[str]:
     stock_scores = []
     temp = 0
 
-    print("Sector:", sector_prefs)
-    print("resilience:", resilience)
-    print("investment_type:", investment_type)
+    print(">>>>Sector:", sector_prefs)
+    print(">>>>Resilience:", resilience)
+    print(">>>>Investment_type:", investment_type)
 
     for symbol in settings.INDEX_STOCKS:
         try:
