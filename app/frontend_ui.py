@@ -69,7 +69,7 @@ def func():
     # 💬 Chat interface below advice
     if "final_advice" in st.session_state:
         st.markdown("---")
-        st.markdown("### 💬 Ask questions about the stock advice")
+        st.markdown("### 💬 Have questions about your stock advice? Let’s dive deeper.")
 
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
