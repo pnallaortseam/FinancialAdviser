@@ -1,20 +1,7 @@
 import pandas as pd
 from datetime import datetime
-from transformers import pipeline
 #from app.config import settings
 from app.data_cache import fundamentals_data, ohlc_data, news_data
-
-sentiment_model = pipeline("sentiment-analysis",
-                           model="distilbert-base-uncased-finetuned-sst-2-english")
-
-def get_sentiment_from_news(df: pd.DataFrame) -> tuple[float, list[str]]:
-    #print("### get_sentiment_from_news")
-    headlines = df["title"].dropna().tolist()[:3]
-    if not headlines:
-        return 0.0, []
-    results = sentiment_model(headlines)
-    score = sum(r["score"] if r["label"] == "POSITIVE" else -r["score"] for r in results)
-    return score / len(results), headlines
 
 def get_company_intro(symbol: str) -> str:
     try:

@@ -10,7 +10,7 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.4)
 def build_structured_prompt(user_input, stock_summaries: dict):
     prompt = "[INST]<<SYS>>"
     prompt += (
-        "You are a financial advisor. Your task is to recommend 5 to 10 stocks based on recent news, basic financial data, and the user's preferences."
+        "You are a financial advisor. Your task is to recommend 5–10 stocks based on provided User profile, information and analyze recent inforamtion from online news, company finatials, recent stock trends quarterly results etc"
         "For each selected stock, provide ONLY: (1) one-line summary (e.g. good growth, or strong sentiment), (2) one-line concern (e.g. high P/E, or weak margins), and (3) Expected growth percentage (4) percentage to invest.(e.g Invest: 10%)"
         "Keep each stock's section brief (max 2 lines + %)."
         "At the end add Cautionary banner"

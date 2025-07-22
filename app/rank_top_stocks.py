@@ -1,8 +1,8 @@
 
 import pandas as pd
-from app.stock_analysis import get_sentiment_from_news
+#from app.stock_analysis import get_sentiment_from_news
 from app.config import settings
-from app.data_cache import ohlc_data, news_data, fundamentals_data, forecast_data
+from app.data_cache import ohlc_data, news_data, fundamentals_data, forecast_data, sentiment_score_data
 
 # Load sector mapping from file
 nifty_path = settings.DATA_DIR / "nifty_500_lst.csv"
@@ -77,8 +77,9 @@ def rank_top_stocks(user_input: dict) -> list[str]:
             df["returns"] = df["Close"].pct_change()
             volatility = df["returns"].std()
 
-            news_df = news_data[symbol]
-            sentiment_score, _ = get_sentiment_from_news(news_df)
+            #news_df = news_data[symbol]
+            #sentiment_score, _ = get_sentiment_from_news(news_df)
+            sentiment_score = sentiment_score_data.get(symbol, 0.0)
 
             fundamentals_df = fundamentals_data[symbol]
             pe = float(fundamentals_df.get("trailingPE", [40])[0])

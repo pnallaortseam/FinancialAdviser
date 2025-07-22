@@ -83,8 +83,6 @@ def func(llm):
         user_msg = st.chat_input("Ask a question related to your stock advice...")
 
         if user_msg:
-            # with st.chat_message("user"):
-            #     st.markdown(user_msg)
             full_prompt = f"""You are a helpful financial assistant.\n\n\
                             Here is the user's financial profile and backend-generated recommendation:\n\
                             {json.dumps(st.session_state["advice_data"], indent=2)}\n\nNow the user asks:\n\
@@ -92,42 +90,62 @@ def func(llm):
                             Please provide a clear, factual, and helpful response.
                             If the question is not related to finance, politely reject it and instruct the user to ask only finance-related questions.
                             """
-
             with st.spinner("Analyzing your advice and crafting a smart response..."):
-              try:
-                  response = llm.invoke(full_prompt).content.strip()
-              except Exception as e:
-                  response = f"⚠️ Failed to fetch LLM response: {e}"
-
-            # with st.chat_message("assistant"):
-            #     st.markdown(response)
+                try:
+                    response = llm.invoke(full_prompt).content.strip()
+                except Exception as e:
+                    response = f"⚠️ Failed to fetch LLM response: {e}"
 
             st.session_state.chat_history.append((user_msg, response))
 
+        if st.session_state.chat_history:
             st.markdown("#### Chat History")
-            st.markdown("<div class=\"chat-box\">", unsafe_allow_html=True)
-            
-        for msg, resp in st.session_state.chat_history:
-            with st.chat_message("user"):
-                st.markdown(msg)
-            with st.chat_message("assistant"):
-                st.markdown(resp)
-                st.markdown("</div>", unsafe_allow_html=True)
+            with st.container():
+                st.markdown("<div class=\"chat-box\">", unsafe_allow_html=True)
 
+                # 🔁 Reverse the chat history so latest is on top
+                for msg, resp in reversed(st.session_state.chat_history):
+                    st.markdown(f"<div class='chat-user'><b>User:</b> {msg}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='chat-bot'><b>Assistant:</b> {resp}</div><hr>", unsafe_allow_html=True)
+
+                st.markdown("</div>", unsafe_allow_html=True)
 
 st.set_page_config(page_title="Financial Adviser", layout="wide")
 
-
-st.markdown("""<style>
-.chat-box, .advice-box {
+st.markdown("""
+<style>
+.advice-box, .chat-box {
     max-height: 400px;
     overflow-y: auto;
     padding: 1rem;
     border: 1px solid #ccc;
     background-color: #fafafa;
     border-radius: 6px;
+    margin-bottom: 1rem;
 }
-</style>""", unsafe_allow_html=True)
+.chat-user {
+    background-color: #e7f3ff;
+    padding: 0.5rem;
+    border-radius: 5px;
+    margin-bottom: 0.2rem;
+}
+.chat-bot {
+    background-color: #f0f0f0;
+    padding: 0.5rem;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+}
+.chat-box {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    background-color: #fafafa;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
 st.title("🤖 Intelligent 💰 Financial Adviser")

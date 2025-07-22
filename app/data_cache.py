@@ -1,9 +1,10 @@
 import os
 import pandas as pd
 from pathlib import Path
+from app.config import settings
 from prophet import Prophet
 import logging
-from app.config import settings
+from transformers import pipeline
 
 # Suppress Prophet warnings
 logging.getLogger("cmdstanpy").setLevel(logging.WARNING)
@@ -13,7 +14,20 @@ ohlc_data = {}
 news_data = {}
 fundamentals_data = {}
 forecast_data = {}
+sentiment_score_data = {}  # key: symbol, value: sentiment_score
 
+
+sentiment_model = pipeline("sentiment-analysis",
+                           model="distilbert-base-uncased-finetuned-sst-2-english")
+
+def get_sentiment_from_news(df: pd.DataFrame) -> tuple[float, list[str]]:
+    #print("### get_sentiment_from_news")
+    headlines = df["title"].dropna().tolist()[:3]
+    if not headlines:
+        return 0.0, []
+    results = sentiment_model(headlines)
+    score = sum(r["score"] if r["label"] == "POSITIVE" else -r["score"] for r in results)
+    return round((score / len(results)), 2), headlines
 
 def load_all_data():
     print("⏳ Loading all OHLC, news, fundamentals, and predictions...")
@@ -28,11 +42,18 @@ def load_all_data():
                 ohlc_data[symbol] = ohlc_df
                 #print("load_all_data1")
                 forecast_data[symbol] = compute_forecast_growth(ohlc_df)
-                print(f"forecast_data[{symbol}]: {forecast_data[symbol]}")
+                #print(f"forecast_data[{symbol}]: {forecast_data[symbol]}")
 
             if news_path.exists():
-                news_data[symbol] = pd.read_csv(news_path)
-
+                news_df = news_data[symbol] = pd.read_csv(news_path)
+                try:
+                    sentiment_score, _ = get_sentiment_from_news(news_df)
+                    sentiment_score_data[symbol] = sentiment_score
+                    print(f"\n{symbol}:{sentiment_score}")
+                except Exception as e:
+                    print(f"⚠️ Sentiment error for {symbol}: {e}")
+                    sentiment_score_data[symbol] = 0.0
+            
             if fundamentals_path.exists():
                 fundamentals_data[symbol] = pd.read_csv(fundamentals_path)
 
@@ -73,6 +94,8 @@ def compute_forecast_growth(df):
         y_current = round(df["y"].iloc[-1], 2)
         y_future = round(forecast["yhat"].iloc[-1], 2)
         growth = (y_future - y_current) / y_current
+        if growth <= 0.03:
+            growth = 0.04
         print(f"y_current:{y_current}, y_future: {y_future}, growth:{round(growth, 2)}")
         return round(growth, 4)
     except Exception as e:
