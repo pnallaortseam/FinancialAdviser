@@ -8,6 +8,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from env import import_my_env
 
 import_my_env()
+
 llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.1)
 
 def call_backend(user_inputs):
@@ -49,8 +50,12 @@ def func(llm):
                     st.session_state["advice_data"] = advice_data
                     st.session_state["final_advice"] = advice_data.get("advice", "")
                     st.success("✅ Advice received!")
-                    # st.markdown("### 📈 Your Stock Recommendation")
-                    # st.markdown(advice)
+                    
+                    print(f"\n\n\n***********User profile***********\n")
+                    print(advice_data.get("user_profile", ""))
+                    print(f"\n\n\n***********Advice***********\n") 
+                    print(st.session_state["final_advice"])
+
                 else:
                     st.error(f"❌ Backend error: {response.status_code}")
             except Exception as e:

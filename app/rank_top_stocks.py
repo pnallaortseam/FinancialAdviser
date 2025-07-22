@@ -54,9 +54,9 @@ def rank_top_stocks(user_input: dict) -> list[str]:
     stock_scores = []
     temp = 0
 
-    print(">>>>Sector:", sector_prefs)
-    print(">>>>Resilience:", resilience)
-    print(">>>>Investment_type:", investment_type)
+    # print(">>>>Sector:", sector_prefs)
+    # print(">>>>Resilience:", resilience)
+    # print(">>>>Investment_type:", investment_type)
 
     for symbol in settings.INDEX_STOCKS:
         try:
@@ -70,7 +70,7 @@ def rank_top_stocks(user_input: dict) -> list[str]:
             if sector_prefs and all(pref not in sector for pref in sector_prefs):
                 continue
             
-            print(f"{symbol}\t: \t {sector}")
+            #print(f"{symbol}\t: \t {sector}")
             
             growth = forecast_data.get(symbol, 0.0)
             df = ohlc_data[symbol].copy()
