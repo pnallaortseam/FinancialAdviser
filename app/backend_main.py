@@ -38,7 +38,7 @@ def on_startup():
     print("App is starting... loading data cache")
     # Check if today's data exists
     any_missing = False
-    for symbol in settings.INDEX_STOCKS[:5]:  # Just check a few to avoid long loops
+    for symbol in settings.INDEX_STOCKS[:1]:  # Just check a few to avoid long loops
         ohlc_path = settings.OHLC_DIR / f"{symbol}_OHLC_{settings.TODAY}.csv"
         news_path = settings.NEWS_DIR / f"{symbol}_news_{settings.TODAY}.csv"
         fund_path = settings.FUNDMENTALS_DIR / f"{symbol}_fundamentals_{settings.TODAY}.csv"
@@ -76,7 +76,7 @@ async def recommend(user: UserProfile):
 
     user_dict = user.dict()
     user_dict["investment_amount"] = user.monthly_investment * 12 * user.years + user.annual_extra_investment * user.years
-    top10 = rank_top_stocks(user_dict)[:10]
+    top10 = rank_top_stocks(user_dict)[:settings.NUM_SCREENED_STOCKS]
     summaries = {symbol.upper(): summarize_stock_insights(symbol) for symbol, _ in top10}
     advice, updated_summaries = get_final_stock_advice(user_dict, summaries)
 
