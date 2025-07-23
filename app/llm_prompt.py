@@ -60,10 +60,9 @@ def get_final_stock_advice(user_input: dict, stock_summaries: dict) -> tuple[str
     print("########get_final_stock_advice")
     print("#### stock_summaries ####\n", stock_summaries)
     prompt = build_structured_prompt(user_input, stock_summaries)
-    print("\n###### Prompt - Start#####\n")
-    print(prompt)
-    print("\n###### Prompt - End  #####\n")
+    #print("\n###### Prompt - Start#####\n")
+    #print(prompt)
+    #print("\n###### Prompt - End  #####\n")
     result = llm.invoke(prompt)
     print(f"\n###### result.content  #####\n {result.content}")
-    #return result.content
     return result.content, stock_summaries
