@@ -1,14 +1,14 @@
 # FinancialAdviser
-Capstone project financial adviser
+Capstone project financial adviser<br/>
 
 ## Steps to Run application with Docker:
-(1) Build build backend & frontend images. Start containers:
-   docker-compose up --build
-(2) Once container are up under PORTS tab change port visibility to Public
-(3) Open the frontend using the link provided under PORTS tab and Submit the request.
-    Results will be displayed on frontend UI
-(4) To stop the containers
-   docker-compose down
+(1) Build build backend & frontend images. Start containers: <br/>
+   docker-compose up --build <br/>
+(2) Once container are up under PORTS tab change port visibility to Public<br/>
+(3) Open the frontend using the link provided under PORTS tab and Submit the request.<br/>
+    Results will be displayed on frontend UI<br/>
+(4) To stop the containers<br/>
+   docker-compose down<br/>
 
 ## Steps to Run application without docker: (TODO - Not complete )
 cd finadviser
@@ -154,8 +154,8 @@ docker logs -f finadviser_backend
 # Tag your images correctly. Retag each local image with your Docker Hub username as the prefix:
 #nrslearning/ is my Docker Hub namespace.
 
-docker tag yourusername/finadviser-backend nrslearning/finadviser-backend:latest
-docker tag yourusername/finadviser-frontend nrslearning/finadviser-frontend:latest
+docker tag yourusername/finadviser-backend nrslearning/finadviser-backend:latest<br/>
+docker tag yourusername/finadviser-frontend nrslearning/finadviser-frontend:latest<br/>
 
 # log in to docker hub
 docker login
