@@ -7,6 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile.backend
     image: nrslearning/finadviser-backend:latest
+    pull_policy: always
     container_name: finadviser_backend
     ports:
       - "8000:8000"
@@ -18,6 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     image: nrslearning/finadviser-frontend-streamlit:latest
+    pull_policy: always
     container_name: finadviser_frontend_streamlit
     ports:
       - "8501:8501"
